@@ -70,8 +70,8 @@ captains/
 
 | 担当 | 選ぶ devcontainer | 中で走っているもの |
 |---|---|---|
-| UI 実装 | frontend | `next dev`（Next.js Hot Reload） |
-| API 実装 | backend | `uvicorn --reload`（FastAPI Hot Reload） |
+| UI 実装 | frontend | `next dev`（attach 時に自動起動、HMR あり）ログ: `tail -f /tmp/next-dev.log` |
+| API 実装 | backend | `uvicorn --reload`（コンテナ起動と同時、HMR あり）ログ: `docker compose logs -f backend` |
 | 仕様駆動で両方見たい | どちらでも可 | **どちらを選んでも frontend/ も backend/ も VS Code エクスプローラに表示される** |
 
 #### Claude Code の初回ログイン
@@ -155,6 +155,14 @@ curl http://localhost:3000                 # frontend（HTML が返る）
 - Docker Desktop のディスク残量（Settings → Resources）を確認
 - `docker system prune` で未使用イメージ・ボリュームを掃除
 - それでもダメなら `docker compose build --no-cache`
+
+### `localhost:3000` が開かない / Next.js が起動していない
+frontend dev サーバは devcontainer attach 時の `postAttachCommand` で裏起動される。VS Code 統合ターミナルから手動で確認・再起動:
+```bash
+pgrep -f 'next dev'                 # プロセスが生きているか
+tail -f /tmp/next-dev.log           # 起動ログを確認
+cd /workspaces/captains/frontend && npm run dev   # 明示的に前面起動したい時
+```
 
 ### Next.js の HMR が効かない
 `WATCHPACK_POLLING=true` が `compose.yaml` で有効になっているか確認。Windows / WSL2 環境で inotify が届かないケース向けの fallback。

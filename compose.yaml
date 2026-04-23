@@ -4,7 +4,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: dev
     image: captains-frontend:dev
     environment:
       NODE_ENV: development
