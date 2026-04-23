@@ -24,7 +24,18 @@
         "bradlc.vscode-tailwindcss",
         "yoavbls.pretty-ts-errors",
         "ms-azuretools.vscode-docker",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "streetsidesoftware.code-spell-checker",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "github.vscode-github-actions",
+        "gruntfuggly.todo-tree",
+        "christian-kohler.npm-intellisense",
+        "christian-kohler.path-intellisense",
+        "oderwat.indent-rainbow",
+        "shardulm94.trailing-spaces",
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint"
       ],
       "settings": {
         "editor.formatOnSave": true,

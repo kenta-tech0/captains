@@ -24,7 +24,17 @@
         "charliermarsh.ruff",
         "tamasfe.even-better-toml",
         "ms-azuretools.vscode-docker",
-        "github.vscode-pull-request-github"
+        "github.vscode-pull-request-github",
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "github.vscode-github-actions",
+        "gruntfuggly.todo-tree",
+        "christian-kohler.path-intellisense",
+        "oderwat.indent-rainbow",
+        "shardulm94.trailing-spaces",
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+        "qwtel.sqlite-viewer"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
