@@ -30,7 +30,7 @@
 | Backend | FastAPI (Python 3.13) + SQLAlchemy + Uvicorn | API |
 | RDB | MySQL 8.4 LTS | 補助金マスタ・ユーザ・申請データ |
 | NoSQL | Azure Cosmos DB vNext Emulator (NoSQL API) | 対話履歴・AI コンテキスト |
-| Orchestration | Docker Compose v2 + `develop.watch` | ローカル開発 |
+| Orchestration | Docker Compose v2 | ローカル開発（devcontainer 経由で起動） |
 | DX | VS Code Dev Containers（frontend / backend 別） | チーム統一環境 |
 
 ディレクトリ構成:
@@ -52,11 +52,7 @@ captains/
 
 ## 環境構築
 
-前提として **Docker Desktop**（または OrbStack / Docker Engine）が入っていること。選択肢は2つある。
-
-### 推奨：VS Code Dev Containers で開く
-
-チームメンバーは基本こちらを使う。拡張機能・Linter・Claude Code CLI まで統一された状態で立ち上がる。
+前提として **Docker Desktop**（または OrbStack / Docker Engine）と **VS Code** が入っていること。本プロジェクトは **VS Code Dev Containers で開くのが唯一の公式フロー**です。拡張機能・Linter・Claude Code CLI まで統一された状態で立ち上がるので、ローカル Node / Python の差異に悩まされません。
 
 1. VS Code 拡張 **Dev Containers**（`ms-vscode-remote.remote-containers`）をインストール
 2. リポジトリを clone して VS Code で開く
@@ -95,25 +91,7 @@ captains/
 | Cosmos DB Gateway | http://localhost:8081 |
 | Cosmos DB Data Explorer | http://localhost:1234/_explorer/index.html |
 
----
-
-### 代替：CLI だけで動かす
-
-VS Code を使わない、または別エディタ派の人向け。
-
-```bash
-cp .env.example .env
-docker compose watch      # ビルド + 起動 + ファイル監視
-```
-
-`watch` モードでは `frontend/` や `backend/` を編集すると自動同期される。`package.json` / `requirements.txt` を変えた時は自動で rebuild される。
-
-停止:
-
-```bash
-docker compose down               # コンテナ停止（DB データは volume に残る）
-docker compose down -v            # DB データもまるごと削除
-```
+停止は VS Code を閉じれば十分。DB データを丸ごと消したい時だけホストで `docker compose down -v` を実行する。
 
 ---
 
