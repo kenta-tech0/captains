@@ -7,6 +7,26 @@
   "service": "backend",
   "workspaceFolder": "/workspaces/captains",
   "shutdownAction": "none",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "username": "vscode",
+      "userUid": "automatic",
+      "userGid": "automatic",
+      "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "nodeGypDependencies": false
+    }
+  },
+  "mounts": [
+    "source=captains-claude-config,target=/home/vscode/.claude,type=volume",
+    "source=captains-shell-history,target=/commandhistory,type=volume"
+  ],
   "forwardPorts": [3000, 8000, 3306, 8081, 1234],
   "portsAttributes": {
     "3000": { "label": "Next.js (frontend)" },
@@ -15,6 +35,7 @@
     "8081": { "label": "Cosmos DB Gateway" },
     "1234": { "label": "Cosmos DB Data Explorer" }
   },
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /commandhistory 2>/dev/null || true; touch /home/vscode/.claude/.claude.json; ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json; sudo npm install -g @anthropic-ai/claude-code",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -42,7 +63,8 @@
         "[python]": {
           "editor.formatOnSave": true,
           "editor.defaultFormatter": "charliermarsh.ruff"
-        }
+        },
+        "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
   }
