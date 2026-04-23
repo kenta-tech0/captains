@@ -1,0 +1,14 @@
+services:
+  frontend:
+    volumes:
+      - ../..:/workspaces/captains:cached
+      - frontend-node-modules:/workspaces/captains/frontend/node_modules
+    working_dir: /workspaces/captains/frontend
+
+  backend:
+    volumes:
+      - ../..:/workspaces/captains:cached
+    working_dir: /workspaces/captains/backend
+
+volumes:
+  frontend-node-modules:
