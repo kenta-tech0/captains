@@ -66,7 +66,7 @@ captains/
 5. **frontend** か **backend** を選ぶ（どちらを選んでも monorepo 全体は見える）
 6. 初回ビルドは数分かかる。終わったら統合ターミナルで `whoami` → `vscode` が返ればOK
 
-#### devcontainer の使い分け
+### devcontainer の使い分け
 
 | 担当 | 選ぶ devcontainer | 中で走っているもの |
 |---|---|---|
@@ -74,13 +74,13 @@ captains/
 | API 実装 | backend | `uvicorn --reload`（コンテナ起動と同時、HMR あり）ログ: `docker compose logs -f backend` |
 | 仕様駆動で両方見たい | どちらでも可 | **どちらを選んでも frontend/ も backend/ も VS Code エクスプローラに表示される** |
 
-#### Claude Code の初回ログイン
+### Claude Code の初回ログイン
 
 1. devcontainer 内のターミナルで `claude login` を実行
 2. 以降は **VS Code 再起動しても、devcontainer を rebuild しても、frontend↔backend を切り替えてもログイン情報は保持される**
 3. ログインを破棄したい時だけ `docker volume rm captains-claude-config`
 
-#### アクセス先
+### アクセス先
 
 | サービス | URL |
 |---|---|
@@ -91,7 +91,15 @@ captains/
 | Cosmos DB Gateway | http://localhost:8081 |
 | Cosmos DB Data Explorer | http://localhost:1234/_explorer/index.html |
 
-停止は VS Code を閉じれば十分。DB データを丸ごと消したい時だけホストで `docker compose down -v` を実行する。
+### 停止・リセット
+
+VS Code を閉じても **コンテナは動き続ける**（`shutdownAction: "none"` で frontend / backend を行き来する時に DB が再起動しないようにしているため）。明示的に止めたい時はホストで:
+
+```bash
+docker compose down                              # コンテナ停止（DB データは volume に残る）
+docker compose down -v                           # DB データ（mysql / cosmosdb）も削除
+docker volume rm captains-claude-config          # Claude Code のログインを破棄（独立 volume）
+```
 
 ---
 
