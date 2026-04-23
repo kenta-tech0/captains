@@ -1,0 +1,37 @@
+{
+  "name": "captains · frontend",
+  "dockerComposeFile": [
+    "../../compose.yaml",
+    "../docker-compose.dev.yml"
+  ],
+  "service": "frontend",
+  "workspaceFolder": "/workspaces/captains",
+  "shutdownAction": "none",
+  "forwardPorts": [3000, 8000, 3306, 8081, 1234],
+  "portsAttributes": {
+    "3000": { "label": "Next.js (frontend)", "onAutoForward": "notify" },
+    "8000": { "label": "FastAPI (backend)" },
+    "3306": { "label": "MySQL" },
+    "8081": { "label": "Cosmos DB Gateway" },
+    "1234": { "label": "Cosmos DB Data Explorer" }
+  },
+  "postCreateCommand": "cd /workspaces/captains/frontend && npm ci",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "yoavbls.pretty-ts-errors",
+        "ms-azuretools.vscode-docker",
+        "github.vscode-pull-request-github"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "eslint.workingDirectories": [{ "directory": "frontend", "changeProcessCWD": true }]
+      }
+    }
+  }
+}
