@@ -32,6 +32,7 @@
     "1234": { "label": "Cosmos DB Data Explorer" }
   },
   "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /commandhistory 2>/dev/null || true; touch /home/vscode/.claude/.claude.json; ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json; sudo npm install -g @anthropic-ai/claude-code; cd /workspaces/captains/frontend && npm ci",
+  "postAttachCommand": "bash -lc \"pgrep -f 'next dev' >/dev/null 2>&1 || (nohup npm --prefix /workspaces/captains/frontend run dev >/tmp/next-dev.log 2>&1 &)\"",
   "customizations": {
     "vscode": {
       "extensions": [

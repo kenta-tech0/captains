@@ -4,7 +4,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: dev
     image: captains-frontend:dev
     environment:
       NODE_ENV: development
@@ -17,18 +16,6 @@ services:
         condition: service_healthy
     networks:
       - app-net
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend
-          target: /app
-          ignore:
-            - node_modules/
-            - .next/
-        - action: rebuild
-          path: ./frontend/package.json
-        - action: rebuild
-          path: ./frontend/package-lock.json
 
   backend:
     build:
@@ -55,19 +42,6 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
-    develop:
-      watch:
-        - action: sync
-          path: ./backend
-          target: /workspace/backend
-          ignore:
-            - __pycache__/
-            - "*.pyc"
-            - .venv/
-        - action: rebuild
-          path: ./backend/requirements.txt
-        - action: rebuild
-          path: ./backend/Dockerfile
 
   mysql:
     image: mysql:8.4
