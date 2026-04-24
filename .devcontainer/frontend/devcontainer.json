@@ -1,14 +1,13 @@
 {
   "name": "captains · frontend",
-  "dockerComposeFile": [
-    "../../compose.yaml",
-    "../docker-compose.dev.yml"
-  ],
-  "service": "frontend",
+  "build": {
+    "dockerfile": "../../frontend/Dockerfile",
+    "context": "../../frontend"
+  },
   "workspaceFolder": "/workspaces/captains",
-  "shutdownAction": "none",
-  "remoteUser": "vscode",
-  "updateRemoteUserUID": true,
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/captains,type=bind,consistency=cached",
+  "initializeCommand": ["docker", "compose", "-f", "${localWorkspaceFolder}/compose.yaml", "up", "-d", "mysql", "cosmosdb"],
+  "runArgs": ["--network=captains_app-net"],
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -17,31 +16,27 @@
       "userUid": "automatic",
       "userGid": "automatic",
       "configureZshAsDefaultShell": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "nodeGypDependencies": true,
+      "installYarnUsingApt": false
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
     }
   },
   "mounts": [
     "source=captains-claude-config,target=/home/vscode/.claude,type=volume",
     "source=captains-shell-history,target=/commandhistory,type=volume"
   ],
-  "forwardPorts": [3000, 8000, 3306, 8081, 1234],
-  "portsAttributes": {
-    "3000": { "label": "Next.js (frontend)", "onAutoForward": "notify" },
-    "8000": { "label": "FastAPI (backend)" },
-    "3306": { "label": "MySQL" },
-    "8081": { "label": "Cosmos DB Gateway" },
-    "1234": { "label": "Cosmos DB Data Explorer" }
-  },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /commandhistory 2>/dev/null || true; touch /home/vscode/.claude/.claude.json; ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json; sudo npm install -g @anthropic-ai/claude-code; cd /workspaces/captains/frontend && npm ci",
-  "postAttachCommand": "bash -lc \"pgrep -f 'next dev' >/dev/null 2>&1 || (nohup npm --prefix /workspaces/captains/frontend run dev >/tmp/next-dev.log 2>&1 &)\"",
   "customizations": {
     "vscode": {
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
-        "yoavbls.pretty-ts-errors",
-        "ms-azuretools.vscode-docker",
-        "github.vscode-pull-request-github",
         "streetsidesoftware.code-spell-checker",
         "mhutchie.git-graph",
         "donjayamanne.githistory",
@@ -56,11 +51,16 @@
       ],
       "settings": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "typescript.tsdk": "frontend/node_modules/typescript/lib",
-        "eslint.workingDirectories": [{ "directory": "frontend", "changeProcessCWD": true }],
         "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
-  }
+  },
+  "forwardPorts": [3000, 8000],
+  "portsAttributes": {
+    "3000": { "label": "Next.js (frontend)", "onAutoForward": "notify" },
+    "8000": { "label": "FastAPI (backend)" }
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/captains /home/vscode/.claude /commandhistory 2>/dev/null || true && touch /home/vscode/.claude/.claude.json && ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json && chown vscode:vscode /home/vscode/.claude.json && npm config delete prefix 2>/dev/null || true && cd /workspaces/captains/frontend && npm install && . /usr/local/share/nvm/nvm.sh && npm install -g @anthropic-ai/claude-code",
+  "postStartCommand": "cd /workspaces/captains/frontend && npm run dev",
+  "remoteUser": "vscode"
 }

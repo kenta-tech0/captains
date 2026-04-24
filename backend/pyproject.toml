@@ -1,0 +1,29 @@
+[project]
+name = "captains-backend"
+version = "0.1.0"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "fastapi>=0.118,<0.119",
+    "uvicorn[standard]>=0.34,<0.35",
+    "sqlalchemy[asyncio]>=2.0,<2.1",
+    "asyncmy>=0.2.10,<0.3",
+    "azure-cosmos>=4.9,<5.0",
+    "pydantic>=2.10,<3.0",
+    "pydantic-settings>=2.6,<3.0",
+    "python-dotenv>=1.0,<2.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7,<1.0",
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "mypy>=1.13,<2.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"

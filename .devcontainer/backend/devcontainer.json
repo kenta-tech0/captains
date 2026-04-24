@@ -1,14 +1,13 @@
 {
   "name": "captains · backend",
-  "dockerComposeFile": [
-    "../../compose.yaml",
-    "../docker-compose.dev.yml"
-  ],
-  "service": "backend",
+  "build": {
+    "dockerfile": "../../backend/Dockerfile",
+    "context": "../../backend"
+  },
   "workspaceFolder": "/workspaces/captains",
-  "shutdownAction": "none",
-  "remoteUser": "vscode",
-  "updateRemoteUserUID": true,
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/captains,type=bind,consistency=cached",
+  "initializeCommand": ["docker", "compose", "-f", "${localWorkspaceFolder}/compose.yaml", "up", "-d", "mysql", "cosmosdb"],
+  "runArgs": ["--network=captains_app-net"],
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -20,32 +19,25 @@
     },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22",
-      "nodeGypDependencies": false
+      "nodeGypDependencies": true,
+      "installYarnUsingApt": false
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": false
     }
   },
   "mounts": [
     "source=captains-claude-config,target=/home/vscode/.claude,type=volume",
     "source=captains-shell-history,target=/commandhistory,type=volume"
   ],
-  "forwardPorts": [3000, 8000, 3306, 8081, 1234],
-  "portsAttributes": {
-    "3000": { "label": "Next.js (frontend)" },
-    "8000": { "label": "FastAPI (backend)", "onAutoForward": "notify" },
-    "3306": { "label": "MySQL" },
-    "8081": { "label": "Cosmos DB Gateway" },
-    "1234": { "label": "Cosmos DB Data Explorer" }
-  },
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /commandhistory 2>/dev/null || true; touch /home/vscode/.claude/.claude.json; ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json; npm install -g @anthropic-ai/claude-code",
   "customizations": {
     "vscode": {
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.debugpy",
+        "streetsidesoftware.code-spell-checker",
         "charliermarsh.ruff",
-        "tamasfe.even-better-toml",
-        "ms-azuretools.vscode-docker",
-        "github.vscode-pull-request-github",
         "mhutchie.git-graph",
         "donjayamanne.githistory",
         "github.vscode-github-actions",
@@ -58,14 +50,21 @@
         "qwtel.sqlite-viewer"
       ],
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.analysis.extraPaths": ["/workspaces/captains/backend"],
         "[python]": {
-          "editor.formatOnSave": true,
-          "editor.defaultFormatter": "charliermarsh.ruff"
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
         },
         "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
-  }
+  },
+  "forwardPorts": [8000],
+  "portsAttributes": {
+    "8000": { "label": "FastAPI (backend)", "onAutoForward": "notify" }
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.claude /commandhistory /opt/venv 2>/dev/null || true && touch /home/vscode/.claude/.claude.json && ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json && chown vscode:vscode /home/vscode/.claude.json && npm config delete prefix 2>/dev/null || true && cd /workspaces/captains/backend && uv sync --frozen && . /usr/local/share/nvm/nvm.sh && npm install -g @anthropic-ai/claude-code",
+  "postAttachCommand": "cd /workspaces/captains/backend && uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+  "remoteUser": "vscode"
 }
