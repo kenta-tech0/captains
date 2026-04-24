@@ -14,7 +14,8 @@
 - [環境構築手順（はじめての人向け）](#環境構築手順はじめての人向け)
 - [開発の進め方](#開発の進め方)
 - [ポート・URL 一覧](#ポートurl-一覧)
-- [よく使うコマンド集](#よく使うコマンド集)
+- [ホスト側で使うコマンド集](#ホスト側で使うコマンド集)
+- [コンテナ内で使うコマンド集](#コンテナ内で使うコマンド集)
 - [トラブルシューティング](#トラブルシューティング)
 - [プロジェクト構成](#プロジェクト構成)
 
@@ -167,25 +168,7 @@ VS Code 上で普通にファイルを編集するだけで OK です。
 VS Code 内で `` Ctrl + ` `` （バッククォート）でターミナルが開きます。これは **コンテナの中のシェル** です。
 ここで `npm` や `uv` のコマンドを直接叩けます。
 
-### フロントで使うコマンド（frontend コンテナ内）
-
-```bash
-npm run dev       # 開発サーバー（自動で起動済み）
-npm run build     # 本番ビルド
-npm run start     # 本番ビルドを起動
-npm run lint      # ESLint
-```
-
-### バックで使うコマンド（backend コンテナ内）
-
-```bash
-uv sync                                          # 依存関係のインストール
-uv run uvicorn app.main:app --reload            # 開発サーバー（自動で起動済み）
-uv run pytest                                    # テスト
-uv run ruff check                                # Lint
-uv run ruff format                               # フォーマット
-uv run mypy                                      # 型チェック
-```
+詳しいコマンド一覧は [コンテナ内で使うコマンド集](#コンテナ内で使うコマンド集) を参照してください。
 
 ### Dev Container を停止したい
 
@@ -212,9 +195,9 @@ docker compose down
 
 ---
 
-## よく使うコマンド集
+## ホスト側で使うコマンド集
 
-ホスト側（あなたの PC のターミナル）から叩くコマンドです。
+> **ホスト側 = あなたの PC のターミナル**（VS Code の外、または Dev Container に入っていない普通のターミナル）
 
 ```bash
 # DB を含むすべてのサービスの状態を確認
@@ -236,6 +219,161 @@ docker compose down -v
 # MySQL に直接接続
 docker compose exec mysql mysql -u captains -p captains
 # パスワードは .env の MYSQL_PASSWORD を入力
+
+# コンテナを使わず一時的にコマンドを叩きたい時
+docker compose exec mysql bash       # MySQL コンテナにシェルで入る
+docker compose exec cosmosdb bash    # Cosmos DB コンテナにシェルで入る
+```
+
+---
+
+## コンテナ内で使うコマンド集
+
+> **コンテナ内 = Dev Container に入った状態の VS Code ターミナル**（`` Ctrl + ` `` で開いたターミナル）
+> VS Code の左下に「Dev Container: captains · frontend」などの表示があれば、そこはコンテナの中です。
+
+### 🟦 フロントエンド（`captains · frontend` コンテナ内）
+
+#### 開発サーバー系
+
+```bash
+npm run dev                 # 開発サーバー起動（Dev Container 起動時に自動実行済み）
+npm run build               # 本番ビルド
+npm run start               # 本番ビルドを起動（build 後）
+```
+
+#### Lint / フォーマット
+
+```bash
+npm run lint                # ESLint チェック
+npm run lint -- --fix       # ESLint 自動修正
+```
+
+#### パッケージ管理（npm）
+
+```bash
+npm install                 # package.json の依存関係をインストール
+npm install <パッケージ名>       # 本番依存を追加（例: npm install axios）
+npm install -D <パッケージ名>    # 開発依存を追加（例: npm install -D @types/node）
+npm uninstall <パッケージ名>     # パッケージを削除
+npm outdated                # 古いパッケージを確認
+npm ls                      # インストール済みパッケージをツリー表示
+```
+
+#### Next.js / Node 周り
+
+```bash
+npx next --help             # Next.js の CLI ヘルプ
+npx next info               # 環境情報の表示（バグ報告時に便利）
+node --version              # Node のバージョン確認
+npm --version               # npm のバージョン確認
+```
+
+#### API へのリクエストテスト
+
+```bash
+# コンテナから backend 側の API を叩くときは `localhost` ではなく backend のサービスホスト名でも OK
+curl http://localhost:8000/health
+```
+
+---
+
+### 🟩 バックエンド（`captains · backend` コンテナ内）
+
+#### 開発サーバー系
+
+```bash
+# 開発サーバー（Dev Container 起動時に自動実行済み）
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+# ポートを変えたい場合
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+#### パッケージ管理（uv）
+
+> `uv` は pip より高速な Python のパッケージマネージャーです。このプロジェクトでは必ず `uv` を使ってください。
+
+```bash
+uv sync                         # pyproject.toml + uv.lock に沿って依存をインストール
+uv sync --frozen                # lock を変更せずに厳密にインストール（CI 向け）
+uv add <パッケージ名>                # 本番依存を追加（例: uv add httpx）
+uv add --dev <パッケージ名>          # 開発依存を追加（例: uv add --dev pytest-mock）
+uv remove <パッケージ名>             # パッケージを削除
+uv lock                         # uv.lock を更新
+uv lock --upgrade               # 依存をすべて最新に更新
+uv tree                         # 依存関係をツリー表示
+```
+
+#### テスト（pytest）
+
+```bash
+uv run pytest                           # 全テスト実行
+uv run pytest -v                        # 詳細ログ付き
+uv run pytest -x                        # 最初の失敗で停止
+uv run pytest -k "test_health"          # 名前にマッチしたテストだけ実行
+uv run pytest tests/test_foo.py         # 特定のファイルだけ実行
+uv run pytest --lf                      # 前回失敗したテストだけ再実行
+uv run pytest -s                        # print 出力を表示
+```
+
+#### Lint / フォーマット / 型チェック
+
+```bash
+uv run ruff check                       # Lint チェック
+uv run ruff check --fix                 # Lint 自動修正
+uv run ruff format                      # フォーマッタ実行
+uv run ruff format --check              # フォーマット違反をチェックのみ
+uv run mypy app                         # 型チェック
+```
+
+#### Python 実行系
+
+```bash
+uv run python                           # Python REPL（対話シェル）
+uv run python -c "print('hi')"          # ワンライナー実行
+uv run python -m app.main               # モジュール実行
+```
+
+#### DB 接続確認（backend コンテナから）
+
+> Dev Container は `captains_app-net` ネットワーク上にあるので、**ホスト名に `mysql` / `cosmosdb` を使って** DB に到達できます。
+
+```bash
+# MySQL に疎通確認（mysql-client がなくても Python で可能）
+uv run python -c "
+import asyncio, asyncmy
+async def main():
+    conn = await asyncmy.connect(host='mysql', user='captains', password='changeme_app', db='captains')
+    print('MySQL OK'); conn.close()
+asyncio.run(main())
+"
+
+# Cosmos DB Emulator に疎通確認
+curl -k http://cosmosdb:8081/
+```
+
+---
+
+### 🟨 両方のコンテナで使えるコマンド（共通）
+
+```bash
+# Git（コンテナ内でもそのまま使える）
+git status
+git switch -c feature/xxx
+git add . && git commit -m "message"
+git push
+
+# 環境変数を確認
+env | grep -i database     # DATABASE_URL などを確認
+echo $PATH
+
+# プロセス確認
+ps aux
+jobs                       # バックグラウンドジョブ一覧
+
+# シェルを抜ける
+exit
 ```
 
 ---
