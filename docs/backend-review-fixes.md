@@ -97,12 +97,29 @@ FastAPI は async ランタイム。同期 client を使うと event loop がブ
 
 | 項目 | 影響 | 対応案 |
 |------|------|--------|
-| `backend/app/templates/template.docx` が **0 バイト** | `/generate` 実行時 500 で落ちる | 実テンプレートを配置。`{{company}}` `{{issues}}` `{{plan}}` `{{effect}}` プレースホルダを含む docx を作成 |
+| ~~`backend/app/templates/template.docx` が **0 バイト**~~ | ~~`/generate` 実行時 500 で落ちる~~ | **解消済み**: `r1y2-1.docx` を素テンプレ、`scripts/build_template.py` を加工スクリプトとし、生成物 `template.docx` をコミットに含めた |
 | `OPENAI_API_KEY` の管理が暗黙 | 本番でキー欠落に気づきにくい | `pydantic-settings` で `Settings` を作り起動時に検証 |
 | `pyproject.toml` で宣言済の `sqlalchemy` / `asyncmy` / `azure-cosmos` が未使用 | image サイズ / supply chain | 実際に使う時点まで削除するか、使う側のモジュールを実装 |
 | エラーハンドリング・rate limit / timeout | OpenAI 側障害でリクエストが詰まる | `httpx.Timeout` / リトライ / 5xx マッピング |
 | `sample_conversation.txt` の置き場所 | 本番にも同梱されている | `backend/tests/fixtures/` に移動するか `.dockerignore` |
 | ロギング | デバッグ困難 | `logging.getLogger(__name__)` で構造化ログ |
+
+---
+
+## テンプレート構成
+
+| ファイル | 役割 |
+|---|---|
+| `backend/app/templates/r1y2-1.docx` | 持続化補助金 様式2-1 の素テンプレ。プレースホルダ無し |
+| `backend/scripts/build_template.py` | 素テンプレに `{{company}}` 等を差し込むビルドスクリプト |
+| `backend/app/templates/template.docx` | ランタイムが読む生成物。スクリプトで再生成可能 |
+
+挿入位置のマッピングは `build_template.py` の `INSERTIONS` 定数を参照。
+
+```bash
+# 素テンプレを更新したらこれで template.docx を作り直す
+uv run python backend/scripts/build_template.py
+```
 
 ---
 
