@@ -1,0 +1,36 @@
+# pre-commit: git commit する直前に自動で走る軽量チェック群
+#
+# セットアップ:
+#   pip install pre-commit       # 一度だけ
+#   pre-commit install           # このリポジトリで有効化
+#
+# 全ファイルに対して試す:
+#   pre-commit run --all-files
+
+repos:
+  # ------------------------------------------------------------
+  # 一般的な軽量チェック (公式の便利フック集)
+  # ------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace        # 行末の空白を除去
+      - id: end-of-file-fixer          # ファイル末尾に改行を 1 つ
+      - id: check-yaml                 # YAML 構文チェック
+      - id: check-toml                 # TOML 構文チェック (pyproject.toml 等)
+      - id: check-merge-conflict       # <<<<<<< が残ってないか
+      - id: check-added-large-files    # 大きいファイルを誤コミットしないか
+        args: [--maxkb=1024]
+
+  # ------------------------------------------------------------
+  # Ruff: Python の lint + format
+  # uv が pyproject に居なくても pre-commit の隔離環境で走るので軽い
+  # ------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff             # lint (--fix で自動修正)
+        args: [--fix]
+        files: ^backend/
+      - id: ruff-format      # フォーマット
+        files: ^backend/

@@ -2,7 +2,8 @@
   "name": "captains · frontend",
   "build": {
     "dockerfile": "../../frontend/Dockerfile",
-    "context": "../../frontend"
+    "context": "../../frontend",
+    "target": "dev"
   },
   "workspaceFolder": "/workspaces/captains",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/captains,type=bind,consistency=cached",
@@ -29,7 +30,8 @@
   },
   "mounts": [
     "source=captains-claude-config,target=/home/vscode/.claude,type=volume",
-    "source=captains-shell-history,target=/commandhistory,type=volume"
+    "source=captains-shell-history,target=/commandhistory,type=volume",
+    "source=captains-frontend-node-modules,target=/workspaces/captains/frontend/node_modules,type=volume"
   ],
   "customizations": {
     "vscode": {
@@ -60,7 +62,7 @@
     "3000": { "label": "Next.js (frontend)", "onAutoForward": "notify" },
     "8000": { "label": "FastAPI (backend)" }
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/captains /home/vscode/.claude /commandhistory 2>/dev/null || true && touch /home/vscode/.claude/.claude.json && ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json && chown vscode:vscode /home/vscode/.claude.json && npm config delete prefix 2>/dev/null || true && cd /workspaces/captains/frontend && npm install && . /usr/local/share/nvm/nvm.sh && npm install -g @anthropic-ai/claude-code",
+  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/captains /workspaces/captains/frontend/node_modules /home/vscode/.claude /commandhistory 2>/dev/null || true && touch /home/vscode/.claude/.claude.json && ln -sf /home/vscode/.claude/.claude.json /home/vscode/.claude.json && chown vscode:vscode /home/vscode/.claude.json && npm config delete prefix 2>/dev/null || true && cd /workspaces/captains/frontend && npm install && . /usr/local/share/nvm/nvm.sh && npm install -g @anthropic-ai/claude-code",
   "postStartCommand": "cd /workspaces/captains/frontend && npm run dev",
   "remoteUser": "vscode"
 }
