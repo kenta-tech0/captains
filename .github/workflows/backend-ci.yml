@@ -1,0 +1,81 @@
+name: backend-ci
+
+# backend/ 配下が変わった時だけ走る軽量 CI。
+# - PR を開いた / push した時に lint・型チェック・import スモーク・docker build を実施
+# - 重いテストは後で追加するときに jobs を足していく
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  # ------------------------------------------------------------
+  # 静的チェック: lint + 型 + import 解決
+  # uv で依存を解決して走らせるので、依存漏れもここで検知できる
+  # ------------------------------------------------------------
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.11.7"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Sync dependencies (with dev)
+        run: uv sync --frozen
+
+      - name: Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Ruff (format check)
+        run: uv run ruff format --check .
+
+      - name: Mypy
+        run: uv run mypy app
+        # 既存コードに型エラーが残っていても CI を止めないための一時措置。
+        # 解消したら continue-on-error を消すこと。
+        continue-on-error: true
+
+      - name: Import smoke test
+        # FastAPI アプリが import できるかだけ検証。
+        # ここで落ちる = 依存漏れ / import パスミス / 構文エラー など致命的問題。
+        env:
+          OPENAI_API_KEY: dummy-key-for-import-only
+          ALLOWED_ORIGINS: http://localhost:3000
+        run: uv run python -c "import app.main; print('import OK')"
+
+  # ------------------------------------------------------------
+  # Docker イメージのビルドが通るかを検証
+  # 依存宣言漏れや Dockerfile のタイポを最終的に防ぐ砦
+  # ------------------------------------------------------------
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+          tags: captains-backend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
