@@ -4,13 +4,12 @@
 #   構造化 JSON → 申請書セクション文章 を生成するモジュール。
 # ============================================================
 
-import json                  # OpenAI レスポンスの JSON パース・dict→文字列化
-from pathlib import Path     # プロンプト .txt ファイルの絶対パス解決
+import json  # OpenAI レスポンスの JSON パース・dict→文字列化
+from pathlib import Path  # プロンプト .txt ファイルの絶対パス解決
 
 # AsyncOpenAI: 非同期(await 可)版の OpenAI クライアント。
 # 同期版 OpenAI を使うと FastAPI の event loop がブロックされるので注意。
 from openai import AsyncOpenAI
-
 
 # --- 定数 --------------------------------------------------------------------
 
@@ -22,8 +21,8 @@ PROMPTS_DIR = Path(__file__).parent / "prompts"
 # 申請書セクションのキー → 対応するプロンプトファイル名 の対応表。
 # main.py 側からは英語キーで呼ぶ約束にし、ファイル名のブレを吸収する。
 SECTION_PROMPTS = {
-    "issues": "issue.txt",   # 課題
-    "plan": "plan.txt",      # 補助事業計画
+    "issues": "issue.txt",  # 課題
+    "plan": "plan.txt",  # 補助事業計画
     "effect": "effect.txt",  # 期待される効果
 }
 
@@ -38,12 +37,14 @@ client = AsyncOpenAI()
 
 # --- ヘルパー ----------------------------------------------------------------
 
+
 def _load_prompt(filename: str) -> str:
     """prompts/ 配下の .txt を UTF-8 で読み込んで文字列で返す。"""
     return (PROMPTS_DIR / filename).read_text(encoding="utf-8")
 
 
 # --- ① 会話文 → 構造化 JSON --------------------------------------------------
+
 
 async def extract_structure(conversation: str) -> dict:
     """ヒアリング会話文を入力し、申請書に必要な情報を JSON で抽出する。"""
@@ -66,6 +67,7 @@ async def extract_structure(conversation: str) -> dict:
 
 
 # --- ② 構造化 JSON → セクション本文 -----------------------------------------
+
 
 async def generate_section(section_key: str, data: dict) -> str:
     """指定セクション(issues / plan / effect)の本文を LLM に書かせる。"""

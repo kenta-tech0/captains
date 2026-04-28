@@ -4,21 +4,20 @@
 #   uvicorn app.main:app で起動されると、ここの `app` が呼ばれる。
 # ============================================================
 
-import asyncio          # 複数の async 処理を並列実行するため (asyncio.gather)
-import os               # 環境変数の読み出し
-import tempfile         # 一時ファイル(出力 docx)の作成
+import asyncio  # 複数の async 処理を並列実行するため (asyncio.gather)
+import os  # 環境変数の読み出し
+import tempfile  # 一時ファイル(出力 docx)の作成
 from pathlib import Path  # OS非依存のパス操作
 
-from fastapi import FastAPI, HTTPException                    # FastAPI 本体とエラー応答
-from fastapi.middleware.cors import CORSMiddleware            # ブラウザからのクロスオリジン許可
-from fastapi.responses import FileResponse                    # ファイルをレスポンスとして返す
-from pydantic import BaseModel                                # リクエストボディのスキーマ定義
-from starlette.background import BackgroundTask               # レスポンス送信後に走らせる後処理
+from fastapi import FastAPI, HTTPException  # FastAPI 本体とエラー応答
+from fastapi.middleware.cors import CORSMiddleware  # ブラウザからのクロスオリジン許可
+from fastapi.responses import FileResponse  # ファイルをレスポンスとして返す
+from pydantic import BaseModel  # リクエストボディのスキーマ定義
+from starlette.background import BackgroundTask  # レスポンス送信後に走らせる後処理
 
 # 自作モジュール（同一パッケージ app.* 配下）
-from app.ai import extract_structure, generate_section        # OpenAI 呼び出しロジック
-from app.docx_writer import fill_docx                         # docx テンプレ穴埋めロジック
-
+from app.ai import extract_structure, generate_section  # OpenAI 呼び出しロジック
+from app.docx_writer import fill_docx  # docx テンプレ穴埋めロジック
 
 # --- パス設定 ----------------------------------------------------------------
 # __file__ はこの main.py 自身の絶対パス。.parent でディレクトリを取得すれば、
